@@ -6,24 +6,30 @@ using UnityEngine.UI;
 public class Store : MonoBehaviour
 {
    
-    float BaseStoreCost;
-    float BaseStoreProfit = 2f;
+   public float BaseStoreCost;
+   public float BaseStoreProfit;
+   public float StoreTimer;
+   public int StoreCount;
+    public bool ManagerUnlocked;
+    public float StoreMultiplier;
+
     public Slider ProgressSlider;
     public gameManager GameManager;
-    int StoreCount;
+  
     public Text StoreCountText;
+    public Text StorePrice;
+    private float NextStoreCost;
    
 
-    float StoreTimer = 2f;
+    
     float CurrentTimer = 0;
     bool StartTimer=false;
     // Start is called before the first frame update
     void Start()
     {
-        StoreCount = 1;
-
-        BaseStoreCost = 1.5f;
-
+        StoreCountText.text = StoreCount.ToString();
+        NextStoreCost = BaseStoreCost;
+        
     }
     // Update is called once per frame
     void Update()
@@ -33,7 +39,8 @@ public class Store : MonoBehaviour
             CurrentTimer += Time.deltaTime;
             if (CurrentTimer > StoreTimer)
             {
-                StartTimer = false;
+                if(!ManagerUnlocked)
+                         StartTimer = false;
                 CurrentTimer = 0f;
                 
                     GameManager.AddToBalance(BaseStoreProfit * StoreCount);
@@ -43,17 +50,19 @@ public class Store : MonoBehaviour
     }
     public void BuyOnClick ()
     {
-        if (!GameManager.CanBuy(BaseStoreCost))
+        if (!GameManager.CanBuy(NextStoreCost))
             return;
         StoreCount++;
-        Debug.Log(StoreCount);
+     
         StoreCountText.text = StoreCount.ToString();
-            GameManager.AddToBalance(- BaseStoreCost);
        
+        GameManager.AddToBalance(-NextStoreCost);
+        NextStoreCost = (BaseStoreCost * Mathf.Pow(StoreMultiplier, StoreCount));
+        StorePrice.text = "Améliorer " + NextStoreCost.ToString("C2");
     }
     public void StoreOnClick()
     {
-        if (!StartTimer)
+        if (!StartTimer & StoreCount>0)
         { StartTimer = true; }
     }
 }
